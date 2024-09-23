@@ -50,7 +50,7 @@ def create_pdf(resume_text):
     return buffer
 
 # Streamlit Setup
-st.title("Generic Resume Builder")
+st.title("Interactive Resume Builder")
 
 # Resume Builder Instance
 resume_builder = ResumeBuilder()
@@ -58,23 +58,20 @@ resume_builder = ResumeBuilder()
 # Sidebar - Customizing Sections
 st.sidebar.header("Customize Your Resume")
 
-# Example of generic sections
-sections = [
-    {"title": "Professional Summary", "content": "This is the professional summary section.", "internal_name": "professional_summary"},
-    {"title": "Experience", "content": "Details about work experience go here.", "internal_name": "experience"},
-    {"title": "Education", "content": "Education details go here.", "internal_name": "education"},
-    {"title": "Skills", "content": "A list of relevant skills go here.", "internal_name": "skills"},
-    {"title": "Certifications", "content": "Certifications and relevant qualifications.", "internal_name": "certifications"},
-    {"title": "Awards", "content": "Awards and recognitions can be listed here.", "internal_name": "awards"}
-]
+# Input sections from the user
+# Example of generic sections where users can input their content
+section_inputs = {
+    "Professional Summary": st.text_area("Professional Summary", "Enter your professional summary here."),
+    "Experience": st.text_area("Experience", "Enter details about your work experience here."),
+    "Education": st.text_area("Education", "Enter details about your education here."),
+    "Skills": st.text_area("Skills", "Enter your skills here."),
+    "Certifications": st.text_area("Certifications", "Enter your certifications here."),
+    "Awards": st.text_area("Awards", "Enter your awards here.")
+}
 
 # Add sections to the resume builder
-for section_data in sections:
-    section = ResumeSection(
-        section_data["title"],
-        section_data["content"],
-        section_data["internal_name"]
-    )
+for title, content in section_inputs.items():
+    section = ResumeSection(title, content, title.lower().replace(" ", "_"))
     resume_builder.add_section(section)
 
 # Sidebar - Create checkboxes for each section
