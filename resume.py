@@ -324,7 +324,7 @@ def main():
     save_data(data)
 
     # Export options
-    st.sidebar.title("
+    st.sidebar.title("```
                      
 if __name__ == "__main__":
   main()
