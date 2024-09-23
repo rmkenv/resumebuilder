@@ -4,15 +4,21 @@ from reportlab.pdfgen import canvas
 from io import BytesIO
 
 class Job:
-    def __init__(self, title, company, location, dates, description):
+    def __init__(self, title, company, location, dates):
         self.title = title
         self.company = company
         self.location = location
         self.dates = dates
-        self.description = description
+        self.descriptions = []  # List to hold multiple descriptions
+
+    def add_description(self, description):
+        self.descriptions.append(description)
 
     def format(self):
-        return f"**{self.title}**\n{self.company} - {self.location}\n{self.dates}\n{self.description}"
+        job_details = f"**{self.title}**\n{self.company}, {self.location}\n{self.dates}\n"
+        for desc in self.descriptions:
+            job_details += f"- {desc}\n"
+        return job_details
 
 class ResumeSection:
     def __init__(self, title, content, internal_name, is_active=True):
@@ -46,7 +52,7 @@ class ResumeBuilder:
     def generate_experience_text(self):
         experience_text = ""
         for job in self.jobs:
-            experience_text += job.format() + "\n\n"
+            experience_text += job.format() + "\n"
         return experience_text
 
     def generate_resume_text(self):
@@ -84,28 +90,37 @@ st.sidebar.header("Customize Your Resume")
 # Input sections from the user
 professional_summary = st.text_area("Professional Summary", "Enter your professional summary here.")
 
-# Create a section for adding multiple jobs
+# Create a section for adding multiple jobs with dynamic subcategories
 st.subheader("Experience")
+all_jobs = []
+
+if 'jobs' not in st.session_state:
+    st.session_state.jobs = []
+
 with st.form("add_job"):
-    job_title = st.text_input("Job Title", "")
-    job_company = st.text_input("Company", "")
-    job_location = st.text_input("Location", "")
-    job_dates = st.text_input("Dates (e.g., Jan 2020 - Present)", "")
-    job_description = st.text_area("Job Description", "Enter job description and subcategories here.")
+    job_title = st.text_input("Job Title")
+    job_company = st.text_input("Company")
+    job_location = st.text_input("Location")
+    job_dates = st.text_input("Dates (e.g., Jan 2020 - Present)")
+    description = st.text_area("Job Description", "Enter job description here.")
     add_job_button = st.form_submit_button("Add Job")
 
     if add_job_button and job_title and job_company and job_location and job_dates:
-        job = Job(job_title, job_company, job_location, job_dates, job_description)
-        resume_builder.add_job(job)
+        new_job = Job(job_title, job_company, job_location, job_dates)
+        new_job.add_description(description)
+        st.session_state.jobs.append(new_job)
         st.success(f"Added job: {job_title} at {job_company}")
 
-# Displaying added jobs
-st.subheader("Added Jobs")
-if resume_builder.jobs:
-    for i, job in enumerate(resume_builder.jobs):
-        st.markdown(f"**{i + 1}. {job.title} at {job.company}**")
-        if st.button(f"Remove {job.title}", key=f"remove_{i}"):
-            resume_builder.jobs.pop(i)
+# Display added jobs and allow for additional descriptions
+for job in st.session_state.jobs:
+    st.subheader(f"{job.title} at {job.company}")
+    if st.button(f"Remove {job.title}"):
+        st.session_state.jobs.remove(job)
+        st.experimental_rerun()
+    with st.expander("Add more details"):
+        new_detail = st.text_area("Additional Detail", "Type here...")
+        if st.button("Add Detail", key=f"add_{job.title}"):
+            job.add_description(new_detail)
             st.experimental_rerun()
 
 # Sidebar - Create checkboxes for each section
