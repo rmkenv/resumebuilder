@@ -189,4 +189,149 @@ def export_to_doc(data):
     doc.add_paragraph(data["summary"])
     
     # Professional Experience
-    doc.add_heading
+    doc.add_heading('Professional Experience', level=1)
+    for job in data["professional_experience"]:
+        doc.add_paragraph(f"{job['title']} at {job['company']}", style='Heading 2')
+        doc.add_paragraph(f"{job['location']} | {job['start_date']} - {job['end_date']}")
+        for resp in job["responsibilities"]:
+            doc.add_paragraph(resp['content'], style='List Bullet')
+    
+    # Education
+    doc.add_heading('Education', level=1)
+    for edu in data["education"]:
+        doc.add_paragraph(f"{edu['degree']} - {edu['institution']}, {edu['location']}")
+    
+    # Awards
+    doc.add_heading('Awards', level=1)
+    for award in data["awards"]:
+        doc.add_paragraph(f"{award['name']} - {award['date']}")
+    
+    # Core Competencies
+    doc.add_heading('Core Competencies', level=1)
+    for category, skills in data["core_competencies"].items():
+        doc.add_paragraph(f"{category}: {', '.join(skills)}")
+    
+    # Certifications
+    doc.add_heading('Certifications', level=1)
+    for cert in data["certifications"]:
+        doc.add_paragraph(cert)
+    
+    # Publications
+    doc.add_heading('Publications', level=1)
+    for pub in data["publications"]:
+        doc.add_paragraph(f"{pub['title']} - {pub['publisher']}, {pub['date']}")
+
+    bio = io.BytesIO()
+    doc.save(bio)
+    return bio
+
+def export_to_pdf(data):
+    bio = io.BytesIO()
+    doc = SimpleDocTemplate(bio, pagesize=letter)
+    styles = getSampleStyleSheet()
+    styles.add(ParagraphStyle(name='Center', alignment=TA_CENTER))
+    story = []
+
+    # Personal Information
+    story.append(Paragraph(data['personal_info'].get('name', ''), styles['Title']))
+    story.append(Paragraph(f"Email: {data['personal_info'].get('email', '')}", styles['Normal']))
+    story.append(Paragraph(f"Phone: {data['personal_info'].get('phone', '')}", styles['Normal']))
+    story.append(Paragraph(f"Location: {data['personal_info'].get('location', '')}", styles['Normal']))
+    story.append(Paragraph(f"LinkedIn: {data['personal_info'].get('linkedin', '')}", styles['Normal']))
+    story.append(Paragraph(f"Website: {data['personal_info'].get('website', '')}", styles['Normal']))
+    story.append(Spacer(1, 12))
+
+    # Summary
+    story.append(Paragraph('Summary', styles['Heading1']))
+    story.append(Paragraph(data["summary"], styles['Normal']))
+    story.append(Spacer(1, 12))
+
+    # Professional Experience
+    story.append(Paragraph('Professional Experience', styles['Heading1']))
+    for job in data["professional_experience"]:
+        story.append(Paragraph(f"{job['title']} at {job['company']}", styles['Heading2']))
+        story.append(Paragraph(f"{job['location']} | {job['start_date']} - {job['end_date']}", styles['Normal']))
+        for resp in job["responsibilities"]:
+            story.append(Paragraph(f"• {resp['content']}", styles['Normal']))
+        story.append(Spacer(1, 6))
+
+    # Education
+    story.append(Paragraph('Education', styles['Heading1']))
+    for edu in data["education"]:
+        story.append(Paragraph(f"{edu['degree']} - {edu['institution']}, {edu['location']}", styles['Normal']))
+    story.append(Spacer(1, 12))
+
+    # Awards
+    story.append(Paragraph('Awards', styles['Heading1']))
+    for award in data["awards"]):
+        story.append(Paragraph(f"{award['name']} - {award['date']}", styles['Normal']))
+    story.append(Spacer(1, 12))
+
+    # Core Competencies
+    story.append(Paragraph('Core Competencies', styles['Heading1']))
+    for category, skills in data["core_competencies"].items():
+        story.append(Paragraph(f"{category}: {', '.join(skills)}", styles['Normal']))
+    story.append(Spacer(1, 12))
+
+    # Certifications
+    story.append(Paragraph('Certifications', styles['Heading1']))
+    for cert in data["certifications"]):
+        story.append(Paragraph(cert, styles['Normal']))
+    story.append(Spacer(1, 12))
+
+    # Publications
+    story.append(Paragraph('Publications', styles['Heading1']))
+    for pub in data["publications"]:
+        story.append(Paragraph(f"{pub['title']} - {pub['publisher']}, {pub['date']}", styles['Normal']))
+
+    doc.build(story)
+    bio.seek(0)
+    return bio
+
+def main():
+    st.title("Resume Editor")
+
+    # File upload
+    uploaded_file = st.file_uploader("Upload a JSON resume file", type="json")
+    if uploaded_file is not None:
+        st.session_state.resume_data = json.load(uploaded_file)
+
+    data = load_data()
+
+    # Sidebar for navigation
+    st.sidebar.title("Navigation")
+    page = st.sidebar.radio("Go to", ["Personal Info", "Summary", "Professional Experience", "Education", "Awards", "Core Competencies", "Certifications", "Publications", "Preview"])
+
+    if page == "Personal Info":
+        edit_personal_info(data)
+    elif page == "Summary":
+        edit_summary(data)
+    elif page == "Professional Experience":
+        edit_professional_experience(data)
+    elif page == "Education":
+        edit_education(data)
+    elif page == "Awards":
+        edit_awards(data)
+    elif page == "Core Competencies":
+        edit_core_competencies(data)
+    elif page == "Certifications":
+        edit_certifications(data)
+    elif page == "Publications":
+        edit_publications(data)
+    elif page == "Preview":
+        display_resume(data)
+
+    save_data(data)
+
+    # Export options
+    st.sidebar.title("Export Options")
+    if st.sidebar.button("Export to DOCX"):
+        bio = export_to_doc(data)
+        st.sidebar.download_button("Download DOCX", bio, file_name="resume.docx")
+
+    if st.sidebar.button("Export to PDF"):
+        bio = export_to_pdf(data)
+        st.sidebar.download_button("Download PDF", bio, file_name="resume.pdf")
+
+if __name__ == "__main__":
+    main()
