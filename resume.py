@@ -3,6 +3,17 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from io import BytesIO
 
+class Job:
+    def __init__(self, title, company, location, dates, description):
+        self.title = title
+        self.company = company
+        self.location = location
+        self.dates = dates
+        self.description = description
+
+    def format(self):
+        return f"**{self.title}**\n{self.company} - {self.location}\n{self.dates}\n{self.description}"
+
 class ResumeSection:
     def __init__(self, title, content, internal_name, is_active=True):
         self.title = title
@@ -18,6 +29,7 @@ class ResumeSection:
 class ResumeBuilder:
     def __init__(self):
         self.sections = []
+        self.jobs = []
 
     def add_section(self, section):
         self.sections.append(section)
@@ -28,10 +40,21 @@ class ResumeBuilder:
                 section.is_active = is_active
                 break
 
+    def add_job(self, job):
+        self.jobs.append(job)
+
+    def generate_experience_text(self):
+        experience_text = ""
+        for job in self.jobs:
+            experience_text += job.format() + "\n\n"
+        return experience_text
+
     def generate_resume_text(self):
         resume = ""
         for section in self.sections:
             resume += section.display()
+        if self.jobs:
+            resume += "**Experience**\n\n" + self.generate_experience_text()
         return resume
 
 def create_pdf(resume_text):
@@ -59,22 +82,35 @@ resume_builder = ResumeBuilder()
 st.sidebar.header("Customize Your Resume")
 
 # Input sections from the user
-# Example of generic sections where users can input their content
-section_inputs = {
-    "Professional Summary": st.text_area("Professional Summary", "Enter your professional summary here."),
-    "Experience": st.text_area("Experience", "Enter details about your work experience here."),
-    "Education": st.text_area("Education", "Enter details about your education here."),
-    "Skills": st.text_area("Skills", "Enter your skills here."),
-    "Certifications": st.text_area("Certifications", "Enter your certifications here."),
-    "Awards": st.text_area("Awards", "Enter your awards here.")
-}
+professional_summary = st.text_area("Professional Summary", "Enter your professional summary here.")
 
-# Add sections to the resume builder
-for title, content in section_inputs.items():
-    section = ResumeSection(title, content, title.lower().replace(" ", "_"))
-    resume_builder.add_section(section)
+# Create a section for adding multiple jobs
+st.subheader("Experience")
+with st.form("add_job"):
+    job_title = st.text_input("Job Title", "")
+    job_company = st.text_input("Company", "")
+    job_location = st.text_input("Location", "")
+    job_dates = st.text_input("Dates (e.g., Jan 2020 - Present)", "")
+    job_description = st.text_area("Job Description", "Enter job description and subcategories here.")
+    add_job_button = st.form_submit_button("Add Job")
+
+    if add_job_button and job_title and job_company and job_location and job_dates:
+        job = Job(job_title, job_company, job_location, job_dates, job_description)
+        resume_builder.add_job(job)
+        st.success(f"Added job: {job_title} at {job_company}")
+
+# Displaying added jobs
+st.subheader("Added Jobs")
+if resume_builder.jobs:
+    for i, job in enumerate(resume_builder.jobs):
+        st.markdown(f"**{i + 1}. {job.title} at {job.company}**")
+        if st.button(f"Remove {job.title}", key=f"remove_{i}"):
+            resume_builder.jobs.pop(i)
+            st.experimental_rerun()
 
 # Sidebar - Create checkboxes for each section
+resume_builder.add_section(ResumeSection("Professional Summary", professional_summary, "professional_summary"))
+
 for section in resume_builder.sections:
     is_active = st.sidebar.checkbox(f"Include {section.title}", value=section.is_active)
     resume_builder.toggle_section(section.internal_name, is_active)
