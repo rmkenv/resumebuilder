@@ -324,4 +324,4 @@ def main():
   save_data(data)
 
   # Export options
-  st.sidebar.title
+  st.sidebar.title("Export Options")
