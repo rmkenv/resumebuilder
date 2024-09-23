@@ -325,3 +325,6 @@ def main():
 
   # Export options
   st.sidebar.title("Export Options")
+
+if __name__ == "__main__":
+  main()
