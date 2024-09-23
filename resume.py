@@ -324,7 +324,5 @@ def main():
     save_data(data)
 
     # Export options
-    st.sidebar.title("```
-                     
-if __name__ == "__main__":
-  main()
+    st.sidebar.title("Export Options")
+    if st.sidebar.button("Export as JSON"):
