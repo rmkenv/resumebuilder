@@ -326,3 +326,70 @@ def main():
     # Export options
     st.sidebar.title("Export Options")
     if st.sidebar.button("Export as JSON"):
+
+        def main():
+    st.title("Resume Editor")
+
+    # File upload
+    uploaded_file = st.file_uploader("Upload a JSON resume file", type="json")
+    if uploaded_file is not None:
+        st.session_state.resume_data = json.load(uploaded_file)
+
+    data = load_data()
+
+    # Sidebar for navigation
+    st.sidebar.title("Navigation")
+    page = st.sidebar.radio("Go to", ["Personal Info", "Summary", "Professional Experience", "Education", "Awards", "Core Competencies", "Certifications", "Publications", "Preview"])
+
+    if page == "Personal Info":
+        edit_personal_info(data)
+    elif page == "Summary":
+        edit_summary(data)
+    elif page == "Professional Experience":
+        edit_professional_experience(data)
+    elif page == "Education":
+        edit_education(data)
+    elif page == "Awards":
+        edit_awards(data)
+    elif page == "Core Competencies":
+        edit_core_competencies(data)
+    elif page == "Certifications":
+        edit_certifications(data)
+    elif page == "Publications":
+        edit_publications(data)
+    elif page == "Preview":
+        display_resume(data)
+
+    save_data(data)
+
+    # Export options
+    st.sidebar.title("Export Options")
+    if st.sidebar.button("Export as JSON"):
+        json_str = json.dumps(data, indent=2)
+        st.sidebar.download_button(
+            label="Download JSON",
+            data=json_str,
+            file_name="resume_data.json",
+            mime="application/json"
+        )
+
+    if st.sidebar.button("Export as DOC"):
+        doc_bio = export_to_doc(data)
+        st.sidebar.download_button(
+            label="Download DOC",
+            data=doc_bio.getvalue(),
+            file_name="resume.docx",
+            mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        )
+
+    if st.sidebar.button("Export as PDF"):
+        pdf_bio = export_to_pdf(data)
+        st.sidebar.download_button(
+            label="Download PDF",
+            data=pdf_bio.getvalue(),
+            file_name="resume.pdf",
+            mime="application/pdf"
+        )
+
+if __name__ == "__main__":
+    main()
