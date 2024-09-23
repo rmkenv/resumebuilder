@@ -166,7 +166,7 @@ def display_resume(data):
         st.write(f"**{category}:** {', '.join(skills)}")
     
     st.subheader("Certifications")
-    for cert in data["certifications"]):
+    for cert in data["certifications"]:
         st.write(cert)
     
     st.subheader("Publications")
@@ -220,7 +220,7 @@ def export_to_doc(data):
     doc.add_heading('Publications', level=1)
     for pub in data["publications"]:
         doc.add_paragraph(f"{pub['title']} - {pub['publisher']}, {pub['date']}")
-
+    
     bio = io.BytesIO()
     doc.save(bio)
     return bio
@@ -263,7 +263,7 @@ def export_to_pdf(data):
 
     # Awards
     story.append(Paragraph('Awards', styles['Heading1']))
-    for award in data["awards"]):
+    for award in data["awards"]:
         story.append(Paragraph(f"{award['name']} - {award['date']}", styles['Normal']))
     story.append(Spacer(1, 12))
 
@@ -275,7 +275,7 @@ def export_to_pdf(data):
 
     # Certifications
     story.append(Paragraph('Certifications', styles['Heading1']))
-    for cert in data["certifications"]):
+    for cert in data["certifications"]:
         story.append(Paragraph(cert, styles['Normal']))
     story.append(Spacer(1, 12))
 
@@ -324,14 +324,4 @@ def main():
     save_data(data)
 
     # Export options
-    st.sidebar.title("Export Options")
-    if st.sidebar.button("Export to DOCX"):
-        bio = export_to_doc(data)
-        st.sidebar.download_button("Download DOCX", bio, file_name="resume.docx")
-
-    if st.sidebar.button("Export to PDF"):
-        bio = export_to_pdf(data)
-        st.sidebar.download_button("Download PDF", bio, file_name="resume.pdf")
-
-if __name__ == "__main__":
-    main()
+    st.sidebar.title("Export Options
